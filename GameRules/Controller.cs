@@ -206,12 +206,10 @@ namespace GameRules
                 }
                 if (!IsFound && northSquare != (-9, -9) && IsSkip(from, northSquare))
                 {
-                    _board.RemovePieceAt(from.x, from.y);
                     IsFound = IsLongSkip(northSquare, to);
                 }
                 if (!IsFound && southSquare != (-9, -9) && IsSkip(from, southSquare))
                 {
-                    _board.RemovePieceAt(from.x, from.y);
                     IsFound = IsLongSkip(southSquare, to);
                 }
             }
