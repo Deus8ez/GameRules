@@ -6,79 +6,64 @@ namespace GameRules
 {
     public class Board
     {
-        public Piece[,] pieces;
+        public Square[,] board;
         public bool cleared = false;
-        bool whiteMoves;
+        public bool whiteMoves;
+
         public Board()
         {
-            pieces = new Piece[8, 8];
+            board = new Square[8, 8];
             Init();
         }
 
         public void Init()
         {
-            //for (int i = 0; i < 3; i++)
-            //{
-            //    for (int j = 0; j < 4; j++)
-            //    {
-            //        SetPieceAt(j, i, Piece.whitePiece);
-            //        SetPieceAt(7 - j, 7 - i, Piece.brownPiece);
-            //    }
-            //}
-
-            SetPieceAt(0, 0, Piece.whitePiece);
-
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i < 8; i++)
             {
-                if (i % 2 == 0)
+                for (int j = 0; j < 8; j++)
                 {
-                    SetPieceAt(i, 1, Piece.whitePiece);
-                    SetPieceAt(i, 3, Piece.whitePiece);
-                    SetPieceAt(i, 5, Piece.whitePiece);
-                    SetPieceAt(i, 7, Piece.whitePiece);
+                    SetPieceAt(j, i, new Square(Piece.none));
                 }
-                else
-                {
-                    SetPieceAt(i, 2, Piece.whitePiece);
-                    SetPieceAt(i, 4, Piece.whitePiece);
-                    SetPieceAt(i, 6, Piece.whitePiece);
+            }
 
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    SetPieceAt(j, i, new Square(Piece.whitePiece));
+                    SetPieceAt(7 - j, 7 - i, new Square(Piece.brownPiece));
                 }
             }
 
             whiteMoves = true;
         }
 
-        public void SetPieceAt(int x, int y, Piece piece)
+        public void SetPieceAt(int x, int y, Square square)
         {
-            pieces[x, y] = piece;
+            board[x, y] = square;
         }
 
         public void RemovePieceAt(int x, int y)
         {
-            pieces[x, y] = 0;
+            board[x, y].piece = Piece.none;
         }
 
-        public Char GetPieceAt(int x, int y)
+        public Square GetSquareAt(int x, int y)
         {
-            if (pieces[x, y] == 0)
-                return (char)Piece.none;
-            return (char)pieces[x, y];
+            return board[x, y];
          }
 
         public void ClearMarkers()
         {
-            for (int i = 0; i < 8; i++)
+            foreach (Square sq in board)
             {
-                for (int j = 0; j < 8; j++)
+                if(sq.piece == Piece.marker)
                 {
-                    if (pieces[i,j] == Piece.marker)
-                    {
-                        RemovePieceAt(i, j);
-                    }
+                    sq.piece = Piece.none;
+                    sq.visited = false;
+                    sq.mustBeUnmarked = false;
                 }
             }
-
         }
     }
 }

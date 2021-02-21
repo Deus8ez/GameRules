@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GameRules
 {
-    enum Square
+    enum SquareColumns
     {
         a,
         b,

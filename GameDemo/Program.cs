@@ -12,6 +12,7 @@ namespace GameDemo
             Controller controller = new Controller(board);
             while (true)
             {
+
                 Print(ToAscii(board));
                 string move = Console.ReadLine();
                 if (move == "")
@@ -38,20 +39,20 @@ namespace GameDemo
                 if (!controller.IsPiece())
                 {
                     Console.WriteLine("no existing piece");
-                } 
+                }
                 else if (!controller.IsFreeSquare())
                 {
                     Console.WriteLine("invalid square");
-                } 
+                }
                 else if (!controller.IsValidMove())
                 {
-                    if(!controller.IsLongSkip(controller._from, controller._to))
+                    if(!controller.IsLongSkip(controller._from, controller._from, controller._to))
                     {
                         Console.WriteLine("invalid jump");
                     } else
                     {
                         controller.Jump();
-                        //controller.SetTurn();
+                        controller.SetTurn();
                         continue;
                     }
                     Console.WriteLine("invalid move");
@@ -59,7 +60,7 @@ namespace GameDemo
                 else
                 {
                     controller.Move();
-                    //controller.SetTurn();
+                    controller.SetTurn();
                 }
 
             }
@@ -75,7 +76,7 @@ namespace GameDemo
                 sb.Append(" | ");
                 for (int j = 0; j < 8; j++)
                 {
-                    sb.Append(board.GetPieceAt(j, i) + " ");
+                    sb.Append((char)board.GetSquareAt(j, i).piece + " ");
                 }
                 sb.AppendLine("|");
             }

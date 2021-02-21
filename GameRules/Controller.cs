@@ -8,7 +8,6 @@ namespace GameRules
     {
         private Board _board;
         private Piece _piece;
-        private Piece _marker;
 
         private bool whiteMoves = true;
         public (int x, int y) _from;
@@ -24,19 +23,18 @@ namespace GameRules
             _from = ((cmd[0] - 'a'), (cmd[1] - '1'));
             _to = ((cmd[2] - 'a'), (cmd[3] - '1'));
             _piece = whiteMoves ? Piece.whitePiece : Piece.brownPiece;
-            _marker = Piece.marker;
         }
 
         public bool IsPiece()
         {          
-            return _board.pieces[_from.x, _from.y] != 0 && _board.pieces[_from.x, _from.y] == _piece;
+            return _board.board[_from.x, _from.y].piece == _piece;
         }
 
         public bool IsFreeSquare()
         {
             if(_to.x < 8 &&  _to.x > -1  && _to.y < 8 && _to.y > -1)
             {
-                return _board.pieces[_to.x, _to.y] == 0;
+                return _board.board[_to.x, _to.y].piece == Piece.none || _board.board[_to.x, _to.y].piece == Piece.marker;
             } 
             
             return false;
@@ -46,9 +44,9 @@ namespace GameRules
         {
             if (x < 8 && x > -1 && y < 8 && y > -1)
             {
-                return _board.pieces[x, y] == 0;
-            } 
-            
+                return _board.board[x, y].piece == Piece.none || _board.board[x, y].piece == Piece.marker;
+            }
+
             return false;
         }
 
@@ -58,10 +56,30 @@ namespace GameRules
                       Math.Abs(_to.x - _from.x) == 1 && _from.y == _to.y; 
         }
 
-        public bool IsSkip((int x, int y) from, (int x, int y) to)
+        public bool IsSkip((int x, int y) from, (int x, int y) to, bool horizontally)
         {
-            return (!IsFreeSquare((to.x), Math.Abs((from.y + to.y) / 2)) || !IsFreeSquare(Math.Abs((from.x + to.x) / 2), (to.y)))
-                && _board.GetPieceAt(to.x, to.y) != Piece.whitePiece.GetHashCode() && _board.GetPieceAt(to.x, to.y) != Piece.brownPiece.GetHashCode();
+
+            if (horizontally && to.x - from.x > 0)
+            {
+                return (_board.GetSquareAt(to.x, to.y).piece == Piece.none || _board.GetSquareAt(to.x, to.y).piece == Piece.marker) && !IsFreeSquare(from.x + 1, from.y) && (_board.GetSquareAt(to.x, to.y).mustBeUnmarked == false); 
+            } 
+            else if(horizontally && to.x - from.x < 0)
+            {
+                return (_board.GetSquareAt(to.x, to.y).piece == Piece.none || _board.GetSquareAt(to.x, to.y).piece == Piece.marker) && !IsFreeSquare(from.x - 1, from.y) && (_board.GetSquareAt(to.x, to.y).mustBeUnmarked == false);
+            }
+            else if (!horizontally && to.y - from.y > 0)
+            {
+                return (_board.GetSquareAt(to.x, to.y).piece == Piece.none || _board.GetSquareAt(to.x, to.y).piece == Piece.marker) && !IsFreeSquare(from.x, from.y + 1) && (_board.GetSquareAt(to.x, to.y).mustBeUnmarked == false);
+            } 
+            else if (!horizontally && to.y - from.y < 0)
+            {
+                return (_board.GetSquareAt(to.x, to.y).piece == Piece.none || _board.GetSquareAt(to.x, to.y).piece == Piece.marker) && !IsFreeSquare(from.x, from.y + 1) && (_board.GetSquareAt(to.x, to.y).mustBeUnmarked == false);
+            }
+            else
+            {
+                return false;
+            }
+
         }
 
         public (int x, int y) IsOnBoard((int x, int y) coords)
@@ -74,13 +92,23 @@ namespace GameRules
             return (-9, -9);
         }
 
-        public bool IsFreeAndValid((int x, int y) from, (int x, int y) to)
+        public bool IsFreeAndValid((int x, int y) from, (int x, int y) to, bool horizontally)
         {
-            return to != (-9, -9) && IsSkip(from, to) && _board.GetPieceAt(to.x, to.y) != Piece.marker.GetHashCode();
+            return to != (-9, -9) && IsSkip(from, to, horizontally);
         }
 
-        public bool IsLongSkip((int x, int y) from, (int x, int y) to)
+        public bool IsLongSkip((int x, int y) jumpedFromSquare, (int x, int y) from, (int x, int y) to)
         {
+
+            if (_board.board[from.x, from.y].visited == true)
+            {
+                _board.board[jumpedFromSquare.x, jumpedFromSquare.y].mustBeUnmarked = true;
+            }
+            else
+            {
+                _board.board[jumpedFromSquare.x, jumpedFromSquare.y].visited = true;
+            }
+
             if ((from.x == to.x) && (from.y == to.y))
             {
                 return true;
@@ -90,139 +118,136 @@ namespace GameRules
             (int x, int y) eastSquare = IsOnBoard((from.x + 2, from.y));
             (int x, int y) southSquare = IsOnBoard((from.x, from.y - 2));
             (int x, int y) westSquare = IsOnBoard((from.x - 2, from.y));
-
+            
             (int x, int y) directionCoords = ((to.x - from.x), (to.y - from.y));
 
             if (directionCoords.x + directionCoords.y == 0 && directionCoords.x == 1 && directionCoords.y == 1) return false;
 
             bool IsFound = false;
 
-            _board.SetPieceAt(from.x, from.y, _marker);
-
             if (directionCoords.x > 0 && directionCoords.y > 0)
             {
                 //north-east;
-                if (!IsFound && IsFreeAndValid(from, northSquare))
+                if (!IsFound && IsFreeAndValid(from, northSquare, false))
                 {
-                    IsFound = IsLongSkip(northSquare, to);
+                    IsFound = IsLongSkip(from, northSquare, to);
                 }
-                else if (!IsFound && IsFreeAndValid(from, eastSquare))
+                else if (!IsFound && IsFreeAndValid(from, eastSquare, true))
                 {
-                    IsFound = IsLongSkip(eastSquare, to);
+                    IsFound = IsLongSkip(from, eastSquare, to);
                 }
             }
             else if (directionCoords.x < 0 && directionCoords.y > 0)
             {
                 //north-west;
-                if (!IsFound && IsFreeAndValid(from, northSquare))
+                if (!IsFound && IsFreeAndValid(from, northSquare, false))
                 {
-                    IsFound = IsLongSkip(northSquare, to);
+                    IsFound = IsLongSkip(from, northSquare, to);
                 }
-                else if (!IsFound && IsFreeAndValid(from, westSquare))
+                else if (!IsFound && IsFreeAndValid(from, westSquare, true))
                 {
-                    IsFound = IsLongSkip(westSquare, to);
+                    IsFound = IsLongSkip(from, westSquare, to);
                 }
-
             }
             else if (directionCoords.x < 0 && directionCoords.y < 0)
             {
                 //south-west;
-                if (!IsFound && IsFreeAndValid(from, southSquare))
+                if (!IsFound && IsFreeAndValid(from, southSquare, false))
                 {
-                    IsFound = IsLongSkip(southSquare, to);
+                    IsFound = IsLongSkip(from, southSquare, to);
                 }
-                else if (!IsFound && IsFreeAndValid(from, westSquare))
+                else if (!IsFound && IsFreeAndValid(from, westSquare, true))
                 {
-                    IsFound = IsLongSkip(westSquare, to);
+                    IsFound = IsLongSkip(from, westSquare, to);
                 }
 
             }
             else if (directionCoords.x > 0 && directionCoords.y < 0)
             {
                 //south-east
-                if (!IsFound && IsFreeAndValid(from, eastSquare))
+                if (!IsFound && IsFreeAndValid(from, eastSquare, true))
                 {
-                    IsFound = IsLongSkip(eastSquare, to);
+                    IsFound = IsLongSkip(from, eastSquare, to);
                 }
-                else if (!IsFound && IsFreeAndValid(from, southSquare))
+                else if (!IsFound && IsFreeAndValid(from, southSquare, false))
                 {
-                    IsFound = IsLongSkip(southSquare, to);
+                    IsFound = IsLongSkip(from, southSquare, to);
                 }
             } 
             else if (directionCoords.x == 0 && directionCoords.y > 0)
             {
                 //north
-                if (!IsFound && IsFreeAndValid(from, northSquare))
+                if (!IsFound && IsFreeAndValid(from, northSquare, false))
                 {
-                    IsFound = IsLongSkip(northSquare, to);
+                    IsFound = IsLongSkip(from, northSquare, to);
                 }
-                if (!IsFound && westSquare != (-9, -9) && IsSkip(from, westSquare))
+                if (!IsFound && IsFreeAndValid(from, westSquare, true))
                 {
-                    IsFound = IsLongSkip(westSquare, to);
+                    IsFound = IsLongSkip(from, westSquare, to);
                 }
-                if (!IsFound && eastSquare != (-9, -9) && IsSkip(from, eastSquare))
+                if (!IsFound && IsFreeAndValid(from, eastSquare, true))
                 {
-                    IsFound = IsLongSkip(eastSquare, to);
+                    IsFound = IsLongSkip(from, eastSquare, to);
                 }
             }
             else if (directionCoords.x == 0 && directionCoords.y < 0)
             {
                 //south
-                if (!IsFound && IsFreeAndValid(from, southSquare))
+                if (!IsFound && IsFreeAndValid(from, southSquare, false))
                 {
-                    IsFound = IsLongSkip(southSquare, to);
+                    IsFound = IsLongSkip(from, southSquare, to);
                 }
-                if (!IsFound && westSquare != (-9, -9) && IsSkip(from, westSquare))
+                if (!IsFound && IsFreeAndValid(from, westSquare, true))
                 {
-                    IsFound = IsLongSkip(westSquare, to);
+                    IsFound = IsLongSkip(from, westSquare, to);
                 }
-                if (!IsFound && eastSquare != (-9, -9) && IsSkip(from, eastSquare))
+                if (!IsFound && IsFreeAndValid(from, eastSquare, true))
                 {
-                    IsFound = IsLongSkip(eastSquare, to);
+                    IsFound = IsLongSkip(from, eastSquare, to);
                 }
             }
             else if (directionCoords.x > 0 && directionCoords.y == 0)
             {
                 //east
-                if (!IsFound && IsFreeAndValid(from, eastSquare))
+                if (!IsFound && IsFreeAndValid(from, eastSquare, true))
                 {
-                    IsFound = IsLongSkip(eastSquare, to);
+                    IsFound = IsLongSkip(from, eastSquare, to);
                 }
-                if (!IsFound && northSquare != (-9, -9) && IsSkip(from, northSquare))
+                if (!IsFound && IsFreeAndValid(from, northSquare, false))
                 {
-                    IsFound = IsLongSkip(northSquare, to);
+                    IsFound = IsLongSkip(from, northSquare, to);
                 }
-                if (!IsFound && southSquare != (-9, -9) && IsSkip(from, southSquare))
+                if (!IsFound && IsFreeAndValid(from, southSquare, false))
                 {
-                    IsFound = IsLongSkip(southSquare, to);
+                    IsFound = IsLongSkip(from, southSquare, to);
                 }
             }
             else if (directionCoords.x < 0 && directionCoords.y == 0)
             {
                 //west
-                if (!IsFound && IsFreeAndValid(from, westSquare))
+                if (!IsFound && IsFreeAndValid(from, westSquare, true))
                 {
-                    IsFound = IsLongSkip(westSquare, to);
+                    IsFound = IsLongSkip(from, westSquare, to);
                 }
-                if (!IsFound && northSquare != (-9, -9) && IsSkip(from, northSquare))
+                if (!IsFound && IsFreeAndValid(from, northSquare, false))
                 {
-                    IsFound = IsLongSkip(northSquare, to);
+                    IsFound = IsLongSkip(from, northSquare, to);
                 }
-                if (!IsFound && southSquare != (-9, -9) && IsSkip(from, southSquare))
+                if (!IsFound && IsFreeAndValid(from, southSquare, false))
                 {
-                    IsFound = IsLongSkip(southSquare, to);
+                    IsFound = IsLongSkip(from, southSquare, to);
                 }
             }
 
-            if (!IsFound && _board.GetPieceAt(from.x, from.y) == _marker.GetHashCode())
+            if (!IsFound && _board.GetSquareAt(from.x, from.y).visited == true)
             {
 
-                _board.RemovePieceAt(from.x, from.y);
+                _board.board[from.x, from.y].piece = Piece.none;
 
                 if (from.x == _from.x && from.y == _from.y)
                 {
                     _board.RemovePieceAt(from.x, from.y);
-                    _board.SetPieceAt(from.x, from.y, _piece);
+                    _board.SetPieceAt(from.x, from.y, new Square(_piece));
                 }
             }
 
@@ -231,14 +256,27 @@ namespace GameRules
 
         public void Move()
         {
+            _board.ClearMarkers();
             _board.RemovePieceAt(_from.x, _from.y);
-            _board.SetPieceAt(_from.x, _from.y, _marker);
-            _board.SetPieceAt(_to.x, _to.y, _piece);
+            _board.board[_from.x, _from.y].visited = true;
+            _board.board[_from.x, _from.y].piece = Piece.marker;
+            _board.SetPieceAt(_to.x, _to.y, new Square(_piece));
         }
 
         public void Jump()
         {
-            _board.SetPieceAt(_to.x, _to.y, _piece);
+            _board.ClearMarkers();
+            _board.RemovePieceAt(_from.x, _from.y);
+
+            foreach (Square sq in _board.board)
+            {
+                if(sq.visited == true && sq.mustBeUnmarked == false)
+                {
+                    sq.piece = Piece.marker;
+                }
+            }
+
+            _board.SetPieceAt(_to.x, _to.y, new Square(_piece));
         }
 
         public void SetTurn()
