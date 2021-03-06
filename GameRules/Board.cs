@@ -57,7 +57,7 @@ namespace GameRules
         {
             foreach (Square sq in board)
             {
-                if(sq.piece == Piece.marker)
+                if(sq.piece == Piece.marker || sq.piece == Piece.none)
                 {
                     sq.piece = Piece.none;
                     sq.visited = false;

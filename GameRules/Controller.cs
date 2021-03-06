@@ -56,6 +56,12 @@ namespace GameRules
                       Math.Abs(_to.x - _from.x) == 1 && _from.y == _to.y; 
         }
 
+        public bool IsValidMove((int x, int y) from, (int x, int y) to)
+        {
+            return Math.Abs(to.y - from.y) == 1 && from.x == to.x ||
+                      Math.Abs(to.x - from.x) == 1 && from.y == to.y;
+        }
+
         public bool IsSkip((int x, int y) from, (int x, int y) to, bool horizontally)
         {
 
@@ -73,7 +79,7 @@ namespace GameRules
             } 
             else if (!horizontally && to.y - from.y < 0)
             {
-                return (_board.GetSquareAt(to.x, to.y).piece == Piece.none || _board.GetSquareAt(to.x, to.y).piece == Piece.marker) && !IsFreeSquare(from.x, from.y + 1) && (_board.GetSquareAt(to.x, to.y).mustBeUnmarked == false);
+                return (_board.GetSquareAt(to.x, to.y).piece == Piece.none || _board.GetSquareAt(to.x, to.y).piece == Piece.marker) && !IsFreeSquare(from.x, from.y - 1) && (_board.GetSquareAt(to.x, to.y).mustBeUnmarked == false);
             }
             else
             {
@@ -254,6 +260,36 @@ namespace GameRules
             return IsFound;
         }
 
+        public void IsSkipable((int x, int y) from)
+        {
+            if(_board.board[from.x, from.y].piece == Piece.none)
+            {
+                _board.board[from.x, from.y].visited = true;
+            }
+
+            (int x, int y) northSquare = IsOnBoard((from.x, from.y + 2));
+            (int x, int y) eastSquare = IsOnBoard((from.x + 2, from.y));
+            (int x, int y) southSquare = IsOnBoard((from.x, from.y - 2));
+            (int x, int y) westSquare = IsOnBoard((from.x - 2, from.y));
+
+            if(IsFreeAndValid(from, northSquare, false) && _board.board[northSquare.x, northSquare.y].visited != true)
+            {
+                IsSkipable(northSquare);
+            } 
+            if (IsFreeAndValid(from, southSquare, false) && _board.board[southSquare.x, southSquare.y].visited != true)
+            {
+                IsSkipable(southSquare);
+            }
+            if (IsFreeAndValid(from, eastSquare, true) && _board.board[eastSquare.x, eastSquare.y].visited != true)
+            {
+                IsSkipable(eastSquare);
+            } 
+            if (IsFreeAndValid(from, westSquare, true) && _board.board[westSquare.x, westSquare.y].visited != true)
+            {
+                IsSkipable(westSquare);
+            }
+        }
+
         public void Move()
         {
             _board.ClearMarkers();
@@ -279,9 +315,52 @@ namespace GameRules
             _board.SetPieceAt(_to.x, _to.y, new Square(_piece));
         }
 
+        public void Mark()
+        {
+            foreach (Square sq in _board.board)
+            {
+                if (sq.visited == true && sq.mustBeUnmarked == false)
+                {
+                    sq.piece = Piece.marker;
+                }
+            }
+        }
+
         public void SetTurn()
         {
             whiteMoves = !whiteMoves;
+        }
+
+        public void MarkValidNeighbours()
+        {
+            (int x, int y) northSquare = IsOnBoard((_from.x, _from.y + 1));
+            (int x, int y) eastSquare = IsOnBoard((_from.x + 1, _from.y));
+            (int x, int y) southSquare = IsOnBoard((_from.x, _from.y - 1));
+            (int x, int y) westSquare = IsOnBoard((_from.x - 1, _from.y));
+
+            if (IsValidMove(_from, northSquare) && _board.board[northSquare.x, northSquare.y].piece == Piece.none)
+            {
+                _board.board[northSquare.x, northSquare.y].visited = true;
+            }
+            if (IsValidMove(_from, eastSquare) && _board.board[eastSquare.x, eastSquare.y].piece == Piece.none)
+            {
+                _board.board[eastSquare.x, eastSquare.y].visited = true;
+            }
+            if (IsValidMove(_from, southSquare) && _board.board[southSquare.x, southSquare.y].piece == Piece.none)
+            {
+                _board.board[southSquare.x, southSquare.y].visited = true;
+            }
+            if (IsValidMove(_from, westSquare) && _board.board[westSquare.x, westSquare.y].piece == Piece.none)
+            {
+                _board.board[westSquare.x, westSquare.y].visited = true;
+            }
+        }
+
+        public void CheckExistingSkips()
+        {
+            MarkValidNeighbours();
+            IsSkipable(_from);
+            Mark();
         }
     }
 }

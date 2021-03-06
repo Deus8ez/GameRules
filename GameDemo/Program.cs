@@ -10,9 +10,12 @@ namespace GameDemo
         {
             Board board = new Board();
             Controller controller = new Controller(board);
+            //Console.WriteLine(Piece.whitePiece.ToString());
+            Console.WriteLine(board.GetSquareAt(0, 0).piece.ToString());
+
             while (true)
             {
-
+                board.ClearMarkers();
                 Print(ToAscii(board));
                 string move = Console.ReadLine();
                 if (move == "")
@@ -34,8 +37,12 @@ namespace GameDemo
 
                 controller.SetCmd(move);
 
-                board.ClearMarkers();
+                controller.CheckExistingSkips();
+                Print(ToAscii(board));
 
+                move = Console.ReadLine();
+                if(move == "1")
+                {
                 if (!controller.IsPiece())
                 {
                     Console.WriteLine("no existing piece");
@@ -61,6 +68,10 @@ namespace GameDemo
                 {
                     controller.Move();
                     controller.SetTurn();
+                }
+                } else
+                {
+                    continue;
                 }
 
             }
