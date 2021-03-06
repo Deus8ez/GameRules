@@ -23,8 +23,17 @@ namespace GameRules
                 for (int j = 0; j < 8; j++)
                 {
                     SetPieceAt(j, i, new Square(Piece.none));
+                    //if (i % 2 != 0 && j % 2 == 0)
+                    //{
+                    //    SetPieceAt(j, i, new Square(Piece.whitePiece));
+                    //}
+                    //if (i % 2 == 0 && j % 2 != 0)
+                    //{
+                    //    SetPieceAt(j, i, new Square(Piece.whitePiece));
+                    //}
                 }
             }
+            //SetPieceAt(0, 0, new Square(Piece.whitePiece));
 
             for (int i = 0; i < 3; i++)
             {

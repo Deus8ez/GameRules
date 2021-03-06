@@ -103,9 +103,13 @@ namespace GameRules
             return to != (-9, -9) && IsSkip(from, to, horizontally);
         }
 
-        public bool IsLongSkip((int x, int y) jumpedFromSquare, (int x, int y) from, (int x, int y) to)
+        public bool IsMarked((int x, int y) to)
         {
+            return _board.board[to.x, to.y].piece == Piece.marker;
+        }
 
+        public bool IsValidLongSkip((int x, int y) jumpedFromSquare, (int x, int y) from, (int x, int y) to)
+        {
             if (_board.board[from.x, from.y].visited == true)
             {
                 _board.board[jumpedFromSquare.x, jumpedFromSquare.y].mustBeUnmarked = true;
@@ -124,7 +128,7 @@ namespace GameRules
             (int x, int y) eastSquare = IsOnBoard((from.x + 2, from.y));
             (int x, int y) southSquare = IsOnBoard((from.x, from.y - 2));
             (int x, int y) westSquare = IsOnBoard((from.x - 2, from.y));
-            
+
             (int x, int y) directionCoords = ((to.x - from.x), (to.y - from.y));
 
             if (directionCoords.x + directionCoords.y == 0 && directionCoords.x == 1 && directionCoords.y == 1) return false;
@@ -134,114 +138,114 @@ namespace GameRules
             if (directionCoords.x > 0 && directionCoords.y > 0)
             {
                 //north-east;
-                if (!IsFound && IsFreeAndValid(from, northSquare, false))
+                if (!IsFound && IsMarked(northSquare))
                 {
-                    IsFound = IsLongSkip(from, northSquare, to);
+                    IsFound = IsValidLongSkip(from, northSquare, to);
                 }
-                else if (!IsFound && IsFreeAndValid(from, eastSquare, true))
+                else if (!IsFound && IsMarked(eastSquare))
                 {
-                    IsFound = IsLongSkip(from, eastSquare, to);
+                    IsFound = IsValidLongSkip(from, eastSquare, to);
                 }
             }
             else if (directionCoords.x < 0 && directionCoords.y > 0)
             {
                 //north-west;
-                if (!IsFound && IsFreeAndValid(from, northSquare, false))
+                if (!IsFound && IsMarked(northSquare))
                 {
-                    IsFound = IsLongSkip(from, northSquare, to);
+                    IsFound = IsValidLongSkip(from, northSquare, to);
                 }
-                else if (!IsFound && IsFreeAndValid(from, westSquare, true))
+                else if (!IsFound && IsMarked(westSquare))
                 {
-                    IsFound = IsLongSkip(from, westSquare, to);
+                    IsFound = IsValidLongSkip(from, westSquare, to);
                 }
             }
             else if (directionCoords.x < 0 && directionCoords.y < 0)
             {
                 //south-west;
-                if (!IsFound && IsFreeAndValid(from, southSquare, false))
+                if (!IsFound && IsMarked(southSquare))
                 {
-                    IsFound = IsLongSkip(from, southSquare, to);
+                    IsFound = IsValidLongSkip(from, southSquare, to);
                 }
-                else if (!IsFound && IsFreeAndValid(from, westSquare, true))
+                else if (!IsFound && IsMarked(westSquare))
                 {
-                    IsFound = IsLongSkip(from, westSquare, to);
+                    IsFound = IsValidLongSkip(from, westSquare, to);
                 }
 
             }
             else if (directionCoords.x > 0 && directionCoords.y < 0)
             {
                 //south-east
-                if (!IsFound && IsFreeAndValid(from, eastSquare, true))
+                if (!IsFound && IsMarked(eastSquare))
                 {
-                    IsFound = IsLongSkip(from, eastSquare, to);
+                    IsFound = IsValidLongSkip(from, eastSquare, to);
                 }
-                else if (!IsFound && IsFreeAndValid(from, southSquare, false))
+                else if (!IsFound && IsMarked(southSquare))
                 {
-                    IsFound = IsLongSkip(from, southSquare, to);
+                    IsFound = IsValidLongSkip(from, southSquare, to);
                 }
-            } 
+            }
             else if (directionCoords.x == 0 && directionCoords.y > 0)
             {
                 //north
-                if (!IsFound && IsFreeAndValid(from, northSquare, false))
+                if (!IsFound && IsMarked(northSquare))
                 {
-                    IsFound = IsLongSkip(from, northSquare, to);
+                    IsFound = IsValidLongSkip(from, northSquare, to);
                 }
-                if (!IsFound && IsFreeAndValid(from, westSquare, true))
+                if (!IsFound && IsMarked(westSquare))
                 {
-                    IsFound = IsLongSkip(from, westSquare, to);
+                    IsFound = IsValidLongSkip(from, westSquare, to);
                 }
-                if (!IsFound && IsFreeAndValid(from, eastSquare, true))
+                if (!IsFound && IsMarked(eastSquare))
                 {
-                    IsFound = IsLongSkip(from, eastSquare, to);
+                    IsFound = IsValidLongSkip(from, eastSquare, to);
                 }
             }
             else if (directionCoords.x == 0 && directionCoords.y < 0)
             {
                 //south
-                if (!IsFound && IsFreeAndValid(from, southSquare, false))
+                if (!IsFound && IsMarked(southSquare))
                 {
-                    IsFound = IsLongSkip(from, southSquare, to);
+                    IsFound = IsValidLongSkip(from, southSquare, to);
                 }
-                if (!IsFound && IsFreeAndValid(from, westSquare, true))
+                if (!IsFound && IsMarked(westSquare))
                 {
-                    IsFound = IsLongSkip(from, westSquare, to);
+                    IsFound = IsValidLongSkip(from, westSquare, to);
                 }
-                if (!IsFound && IsFreeAndValid(from, eastSquare, true))
+                if (!IsFound && IsMarked(eastSquare))
                 {
-                    IsFound = IsLongSkip(from, eastSquare, to);
+                    IsFound = IsValidLongSkip(from, eastSquare, to);
                 }
             }
             else if (directionCoords.x > 0 && directionCoords.y == 0)
             {
                 //east
-                if (!IsFound && IsFreeAndValid(from, eastSquare, true))
+                if (!IsFound && IsMarked(eastSquare))
                 {
-                    IsFound = IsLongSkip(from, eastSquare, to);
+                    IsFound = IsValidLongSkip(from, eastSquare, to);
                 }
-                if (!IsFound && IsFreeAndValid(from, northSquare, false))
+                if (!IsFound && IsMarked(northSquare))
                 {
-                    IsFound = IsLongSkip(from, northSquare, to);
+                    IsFound = IsValidLongSkip(from, northSquare, to);
                 }
-                if (!IsFound && IsFreeAndValid(from, southSquare, false))
+                if (!IsFound && IsMarked(southSquare))
                 {
-                    IsFound = IsLongSkip(from, southSquare, to);
+                    IsFound = IsValidLongSkip(from, southSquare, to);
                 }
             }
             else if (directionCoords.x < 0 && directionCoords.y == 0)
             {
                 //west
-                if (!IsFound && IsFreeAndValid(from, westSquare, true))
+                if (!IsFound && IsMarked(westSquare))
                 {
-                    IsFound = IsLongSkip(from, westSquare, to);
+                    IsFound = IsValidLongSkip(from, westSquare, to);
                 }
-                if (!IsFound && IsFreeAndValid(from, northSquare, false))
+                if (!IsFound && IsMarked(northSquare))
                 {
-                    IsFound = IsLongSkip(from, northSquare, to);
+                    IsFound = IsValidLongSkip(from, northSquare, to);
                 }
-                if (!IsFound && IsFreeAndValid(from, southSquare, false))
+                if (!IsFound && IsMarked(southSquare))
                 {
-                    IsFound = IsLongSkip(from, southSquare, to);
+                    IsFound = IsValidLongSkip(from, southSquare, to);
                 }
             }
 

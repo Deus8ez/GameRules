@@ -10,8 +10,6 @@ namespace GameDemo
         {
             Board board = new Board();
             Controller controller = new Controller(board);
-            //Console.WriteLine(Piece.whitePiece.ToString());
-            Console.WriteLine(board.GetSquareAt(0, 0).piece.ToString());
 
             while (true)
             {
@@ -38,38 +36,39 @@ namespace GameDemo
                 controller.SetCmd(move);
 
                 controller.CheckExistingSkips();
-                Print(ToAscii(board));
 
                 move = Console.ReadLine();
+
                 if(move == "1")
                 {
-                if (!controller.IsPiece())
-                {
-                    Console.WriteLine("no existing piece");
-                }
-                else if (!controller.IsFreeSquare())
-                {
-                    Console.WriteLine("invalid square");
-                }
-                else if (!controller.IsValidMove())
-                {
-                    if(!controller.IsLongSkip(controller._from, controller._from, controller._to))
+                    if (!controller.IsPiece())
                     {
-                        Console.WriteLine("invalid jump");
-                    } else
-                    {
-                        controller.Jump();
-                        controller.SetTurn();
-                        continue;
+                        Console.WriteLine("no existing piece");
                     }
-                    Console.WriteLine("invalid move");
-                }
+                    else if (!controller.IsFreeSquare())
+                    {
+                        Console.WriteLine("invalid square");
+                    }
+                    else if (!controller.IsValidMove())
+                    {
+                        if(!controller.IsValidLongSkip(controller._from, controller._from, controller._to))
+                        {
+                            Console.WriteLine("invalid jump");
+                        } else
+                        {
+                            controller.Jump();
+                                controller.SetTurn();
+                                continue;
+                        }
+                        Console.WriteLine("invalid move");
+                    }
+                    else
+                    {
+                        controller.Move();
+                            controller.SetTurn();
+                    }
+                } 
                 else
-                {
-                    controller.Move();
-                    controller.SetTurn();
-                }
-                } else
                 {
                     continue;
                 }
