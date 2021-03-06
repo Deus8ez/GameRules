@@ -337,26 +337,31 @@ namespace GameRules
 
         public void MarkValidNeighbours()
         {
+
             (int x, int y) northSquare = IsOnBoard((_from.x, _from.y + 1));
             (int x, int y) eastSquare = IsOnBoard((_from.x + 1, _from.y));
             (int x, int y) southSquare = IsOnBoard((_from.x, _from.y - 1));
             (int x, int y) westSquare = IsOnBoard((_from.x - 1, _from.y));
 
-            if (IsValidMove(_from, northSquare) && _board.board[northSquare.x, northSquare.y].piece == Piece.none)
+            List<(int, int)> directions = new List<(int, int)>()
             {
-                _board.board[northSquare.x, northSquare.y].visited = true;
+                northSquare,
+                eastSquare,
+                southSquare,
+                westSquare
+            };
+
+            foreach((int x, int y) direction in directions)
+            {
+                ValidateAndMark(direction);
             }
-            if (IsValidMove(_from, eastSquare) && _board.board[eastSquare.x, eastSquare.y].piece == Piece.none)
+        }
+
+        public void ValidateAndMark((int x, int y) square)
+        {
+            if (IsValidMove(_from, square) && _board.board[square.x, square.y].piece == Piece.none)
             {
-                _board.board[eastSquare.x, eastSquare.y].visited = true;
-            }
-            if (IsValidMove(_from, southSquare) && _board.board[southSquare.x, southSquare.y].piece == Piece.none)
-            {
-                _board.board[southSquare.x, southSquare.y].visited = true;
-            }
-            if (IsValidMove(_from, westSquare) && _board.board[westSquare.x, westSquare.y].piece == Piece.none)
-            {
-                _board.board[westSquare.x, westSquare.y].visited = true;
+                _board.board[square.x, square.y].visited = true;
             }
         }
 
