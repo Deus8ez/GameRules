@@ -8,10 +8,15 @@ namespace GameRules
     {
         private Board _board;
         private Piece _piece;
+        public List<KeyValuePair<(int xFrom, int yFrom), (int xTo, int yTo)>> listOfSquares = new List<KeyValuePair<(int xFrom, int yFrom), (int xTo, int yTo)>>();
+
 
         private bool whiteMoves = true;
         public (int x, int y) _from;
         public (int x, int y) _to; 
+            
+        public bool endGame = false;
+        public bool robotWon = false;
 
         public Controller(Board board)
         {
@@ -251,7 +256,6 @@ namespace GameRules
 
             if (!IsFound && _board.GetSquareAt(from.x, from.y).visited == true)
             {
-
                 _board.board[from.x, from.y].piece = Piece.none;
 
                 if (from.x == _from.x && from.y == _from.y)
@@ -269,6 +273,7 @@ namespace GameRules
             if(_board.board[from.x, from.y].piece == Piece.none)
             {
                 _board.board[from.x, from.y].visited = true;
+                listOfSquares.Add(new KeyValuePair<(int xFrom, int yFrom), (int xTo, int yTo)>((_from.x, _from.y),(from.x, from.y)));
             }
 
             (int x, int y) northSquare = IsOnBoard((from.x, from.y + 2));
@@ -301,6 +306,7 @@ namespace GameRules
             _board.board[_from.x, _from.y].visited = true;
             _board.board[_from.x, _from.y].piece = Piece.marker;
             _board.SetPieceAt(_to.x, _to.y, new Square(_piece));
+            listOfSquares.Clear();
         }
 
         public void Jump()
@@ -317,6 +323,7 @@ namespace GameRules
             }
 
             _board.SetPieceAt(_to.x, _to.y, new Square(_piece));
+            listOfSquares.Clear();
         }
 
         public void Mark()
@@ -335,6 +342,68 @@ namespace GameRules
             whiteMoves = !whiteMoves;
         }
 
+        public void EstimateAndMark((int x, int y) to)
+        {
+            int minDistance = 0;
+            int squareToZeroDistance = 0;
+            (int x, int y) direction = (0, 0);
+            (int x, int y) squareToMark = (-9, -9);
+            (int x, int y) squareToRemove = (-9, -9);
+            
+            for (int i = 0; i < listOfSquares.Count; i++)
+            {
+                squareToZeroDistance = (listOfSquares[i].Key.xFrom - to.x) + (listOfSquares[i].Key.yFrom - to.y);
+                direction = ((listOfSquares[i].Value.xTo - listOfSquares[i].Key.xFrom), (listOfSquares[i].Value.yTo - listOfSquares[i].Key.yFrom));
+                if (squareToZeroDistance >= minDistance && ((direction.x == 0 && direction.y < 0) || (direction.x < 0 && direction.y == 0)))
+                {
+                    minDistance = squareToZeroDistance;
+                    squareToMark = listOfSquares[i].Value;
+                    squareToRemove = listOfSquares[i].Key;
+                }
+            }
+
+            if (squareToMark.x != -9 && endGame == false)
+            {
+                _board.RemovePieceAt(squareToRemove.x, squareToRemove.y);
+                _board.SetPieceAt(squareToMark.x, squareToMark.y, new Square(Piece.brownPiece));
+                listOfSquares.Clear();
+            } else
+            {
+                endGame = true;
+                if(listOfSquares.Count - 1 > 0)
+                {
+                    for (int i = listOfSquares.Count - 1; i > 0; i--)
+                    {
+                        direction = ((listOfSquares[i].Value.xTo - listOfSquares[i].Key.xFrom), (listOfSquares[i].Value.yTo - listOfSquares[i].Key.yFrom));
+                        if (direction.x > 0 && direction.y == 0)
+                        {
+                            squareToMark = listOfSquares[i].Value;
+                            squareToRemove = listOfSquares[i].Key;
+                            break;
+                        }
+                    }
+
+                    for (int i = listOfSquares.Count - 1; i > 0; i--)
+                    {
+                        direction = ((listOfSquares[i].Value.xTo - listOfSquares[i].Key.xFrom), (listOfSquares[i].Value.yTo - listOfSquares[i].Key.yFrom));
+                        if (direction.x == 0 && direction.y < 0)
+                        {
+                            squareToMark = listOfSquares[i].Value;
+                            squareToRemove = listOfSquares[i].Key;
+                            break;
+                        }
+                    }
+
+                    _board.RemovePieceAt(squareToRemove.x, squareToRemove.y);
+                    _board.SetPieceAt(squareToMark.x, squareToMark.y, new Square(Piece.brownPiece));
+                    listOfSquares.Clear();
+                } else
+                {
+                    robotWon = true;
+                }
+            }
+        }
+
         public void MarkValidNeighbours()
         {
 
@@ -342,6 +411,27 @@ namespace GameRules
             (int x, int y) eastSquare = IsOnBoard((_from.x + 1, _from.y));
             (int x, int y) southSquare = IsOnBoard((_from.x, _from.y - 1));
             (int x, int y) westSquare = IsOnBoard((_from.x - 1, _from.y));
+
+            List<(int, int)> directions = new List<(int, int)>()
+            {
+                northSquare,
+                eastSquare,
+                southSquare,
+                westSquare
+            };
+
+            foreach ((int x, int y) direction in directions)
+            {
+                ValidateAndMark(direction);
+            }
+        }
+
+        public void MarkValidNeighbours(int x, int y)
+        {
+            (int x, int y) northSquare = IsOnBoard((x, y + 1));
+            (int x, int y) eastSquare = IsOnBoard((x + 1, y));
+            (int x, int y) southSquare = IsOnBoard((x, y - 1));
+            (int x, int y) westSquare = IsOnBoard((x - 1, y));
 
             List<(int, int)> directions = new List<(int, int)>()
             {
@@ -359,9 +449,10 @@ namespace GameRules
 
         public void ValidateAndMark((int x, int y) square)
         {
-            if (IsValidMove(_from, square) && _board.board[square.x, square.y].piece == Piece.none)
+            if (IsValidMove(_from, square) && _board.board[square.x, square.y].piece == Piece.none && _board.GetSquareAt(_from.x, _from.y).markedByRobot == false)
             {
-                _board.board[square.x, square.y].visited = true;
+                //_board.board[square.x, square.y].visited = true;
+                listOfSquares.Add(new KeyValuePair<(int xFrom, int yFrom), (int xTo, int yTo)>((_from.x, _from.y), (square.x, square.y)));
             }
         }
 
@@ -370,6 +461,29 @@ namespace GameRules
             MarkValidNeighbours();
             IsSkipable(_from);
             Mark();
+        }
+
+        public void LockSquares()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                int count = 0;
+                for (int j = 0; j < 4; j++)
+                {
+                    if (_board.GetSquareAt(j, i).piece == Piece.brownPiece)
+                    {
+                        count++;
+                    }
+                }
+
+                if(count == 4)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        _board.GetSquareAt(j, i).markedByRobot = true; 
+                    }
+                }
+            }
         }
     }
 }

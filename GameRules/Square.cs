@@ -9,6 +9,7 @@ namespace GameRules
         public Piece piece;
         public bool visited = false;
         public bool mustBeUnmarked = false;
+        public bool markedByRobot = false;
 
         public Square(Piece newPiece)
         {

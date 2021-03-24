@@ -10,70 +10,158 @@ namespace GameDemo
         {
             Board board = new Board();
             Controller controller = new Controller(board);
+            Robot robot = new Robot(controller, board);
+            bool aiGame = true;
 
-            while (true)
+            if (aiGame)
             {
-                board.ClearMarkers();
-                Print(ToAscii(board));
-                string move = Console.ReadLine();
-                if (move == "")
-                {
-                    break;
-                } else if (move == "s")
-                {
-                    controller.SetTurn();
-                    continue;
-                } else if(move == "c")
+                while (true)
                 {
                     board.ClearMarkers();
-                    continue;
-                } else if(move == "r")
-                {
-                    board.Init();
-                    board.ClearMarkers();
-                }
-
-                controller.SetCmd(move);
-
-                controller.CheckExistingSkips();
-
-                move = Console.ReadLine();
-
-                if(move == "1")
-                {
-                    if (!controller.IsPiece())
+                    Print(ToAscii(board));
+                    string move = Console.ReadLine();
+                    if (move == "")
                     {
-                        Console.WriteLine("no existing piece");
+                        break;
                     }
-                    else if (!controller.IsFreeSquare())
+                    else if (move == "s")
                     {
-                        Console.WriteLine("invalid square");
+                        controller.SetTurn();
+                        continue;
                     }
-                    else if (!controller.IsValidMove())
+                    else if (move == "c")
                     {
-                        if(!controller.IsValidLongSkip(controller._from, controller._from, controller._to))
+                        board.ClearMarkers();
+                        continue;
+                    }
+                    else if (move == "r")
+                    {
+                        board.Init();
+                        board.ClearMarkers();
+                    } else if (move == "2")
+                    {
+                        robot.MakeMove();
+                        robot.Mark();
+
+                        continue;
+                    }
+
+                    controller.SetCmd(move);
+
+                    controller.CheckExistingSkips();
+
+                    Print(ToAscii(board));
+
+                    move = Console.ReadLine();
+
+                    if (move == "1")
+                    {
+                        if (!controller.IsPiece())
                         {
-                            Console.WriteLine("invalid jump");
-                        } else
-                        {
-                            controller.Jump();
-                                controller.SetTurn();
-                                continue;
+                            Console.WriteLine("no existing piece");
                         }
-                        Console.WriteLine("invalid move");
+                        else if (!controller.IsFreeSquare())
+                        {
+                            Console.WriteLine("invalid square");
+                        }
+                        else if (!controller.IsValidMove())
+                        {
+                            if (!controller.IsValidLongSkip(controller._from, controller._from, controller._to))
+                            {
+                                Console.WriteLine("invalid jump");
+                            }
+                            else
+                            {
+                                controller.Jump();
+                                robot.MakeMove();
+                                robot.Mark();
+                                continue;
+                            }
+                            Console.WriteLine("invalid move");
+                        }
+                        else
+                        {
+                            controller.Move();
+                            robot.MakeMove();
+                            robot.Mark();
+                        }
                     }
                     else
                     {
-                        controller.Move();
-                            controller.SetTurn();
+                        continue;
                     }
-                } 
-                else
-                {
-                    continue;
                 }
-
             }
+            else
+            {
+                while (true)
+                {
+                    board.ClearMarkers();
+                    Print(ToAscii(board));
+                    string move = Console.ReadLine();
+                    if (move == "")
+                    {
+                        break;
+                    }
+                    else if (move == "s")
+                    {
+                        controller.SetTurn();
+                        continue;
+                    }
+                    else if (move == "c")
+                    {
+                        board.ClearMarkers();
+                        continue;
+                    }
+                    else if (move == "r")
+                    {
+                        board.Init();
+                        board.ClearMarkers();
+                    }
+
+                    controller.SetCmd(move);
+
+                    controller.CheckExistingSkips();
+                    Print(ToAscii(board));
+
+                    move = Console.ReadLine();
+
+                    if (move == "1")
+                    {
+                        if (!controller.IsPiece())
+                        {
+                            Console.WriteLine("no existing piece");
+                        }
+                        else if (!controller.IsFreeSquare())
+                        {
+                            Console.WriteLine("invalid square");
+                        }
+                        else if (!controller.IsValidMove())
+                        {
+                            if (!controller.IsValidLongSkip(controller._from, controller._from, controller._to))
+                            {
+                                Console.WriteLine("invalid jump");
+                            }
+                            else
+                            {
+                                controller.Jump();
+                                controller.SetTurn();
+                                continue;
+                            }
+                            Console.WriteLine("invalid move");
+                        }
+                        else
+                        {
+                            controller.Move();
+                            controller.SetTurn();
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }          
         }
 
         static string ToAscii(Board board)

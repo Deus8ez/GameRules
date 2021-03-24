@@ -44,6 +44,11 @@ namespace GameRules
                 }
             }
 
+            //SetPieceAt(2, 3, new Square(Piece.brownPiece));
+            //SetPieceAt(3, 3, new Square(Piece.brownPiece));
+            //SetPieceAt(2, 2, new Square(Piece.brownPiece));
+            //SetPieceAt(3, 2, new Square(Piece.brownPiece));
+
             whiteMoves = true;
         }
 
