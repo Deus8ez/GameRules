@@ -8,15 +8,14 @@ namespace GameRules
     {
         private Board _board;
         private Piece _piece;
-        public List<KeyValuePair<(int xFrom, int yFrom), (int xTo, int yTo)>> listOfSquares = new List<KeyValuePair<(int xFrom, int yFrom), (int xTo, int yTo)>>();
+        private List<KeyValuePair<(int xFrom, int yFrom), (int xTo, int yTo)>> listOfSquares = new List<KeyValuePair<(int xFrom, int yFrom), (int xTo, int yTo)>>();
 
 
         private bool whiteMoves = true;
-        public (int x, int y) _from;
-        public (int x, int y) _to; 
-            
-        public bool endGame = false;
-        public bool robotWon = false;
+        internal (int x, int y) _from;
+        internal (int x, int y) _to;
+
+        internal bool endGame = false;
 
         public Controller(Board board)
         {
@@ -406,7 +405,6 @@ namespace GameRules
 
         public void MarkValidNeighbours()
         {
-
             (int x, int y) northSquare = IsOnBoard((_from.x, _from.y + 1));
             (int x, int y) eastSquare = IsOnBoard((_from.x + 1, _from.y));
             (int x, int y) southSquare = IsOnBoard((_from.x, _from.y - 1));
@@ -451,7 +449,7 @@ namespace GameRules
         {
             if (IsValidMove(_from, square) && _board.board[square.x, square.y].piece == Piece.none && _board.GetSquareAt(_from.x, _from.y).markedByRobot == false)
             {
-                //_board.board[square.x, square.y].visited = true;
+                _board.board[square.x, square.y].visited = true;
                 listOfSquares.Add(new KeyValuePair<(int xFrom, int yFrom), (int xTo, int yTo)>((_from.x, _from.y), (square.x, square.y)));
             }
         }

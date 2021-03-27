@@ -6,9 +6,9 @@ namespace GameRules
 {
     public class Robot
     {
-        public Controller _controller;
+        private Controller _controller;
         private Board _board;
-        public List<Square> pieces = new List<Square>();
+        private List<Square> pieces = new List<Square>();
 
         public Robot(Controller newController, Board newBoard)
         {
