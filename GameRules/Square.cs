@@ -4,6 +4,7 @@ using System.Text;
 
 namespace GameRules
 {
+    [System.Serializable]
     public class Square
     {
         public Piece piece;

@@ -8,12 +8,10 @@ namespace GameRules
     {
         public Square[,] board;
         public bool cleared = false;
-        public bool whiteMoves;
 
         public Board()
         {
-            board = new Square[8, 8];
-            Init();
+            board = new Square[8, 8];           
         }
 
         public void Init()
@@ -23,17 +21,8 @@ namespace GameRules
                 for (int j = 0; j < 8; j++)
                 {
                     SetPieceAt(j, i, new Square(Piece.none));
-                    //if (i % 2 != 0 && j % 2 == 0)
-                    //{
-                    //    SetPieceAt(j, i, new Square(Piece.whitePiece));
-                    //}
-                    //if (i % 2 == 0 && j % 2 != 0)
-                    //{
-                    //    SetPieceAt(j, i, new Square(Piece.whitePiece));
-                    //}
                 }
             }
-            //SetPieceAt(0, 0, new Square(Piece.whitePiece));
 
             for (int i = 0; i < 3; i++)
             {
@@ -43,13 +32,6 @@ namespace GameRules
                     SetPieceAt(7 - j, 7 - i, new Square(Piece.brownPiece));
                 }
             }
-
-            //SetPieceAt(2, 3, new Square(Piece.brownPiece));
-            //SetPieceAt(3, 3, new Square(Piece.brownPiece));
-            //SetPieceAt(2, 2, new Square(Piece.brownPiece));
-            //SetPieceAt(3, 2, new Square(Piece.brownPiece));
-
-            whiteMoves = true;
         }
 
         public void SetPieceAt(int x, int y, Square square)

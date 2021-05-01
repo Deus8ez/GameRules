@@ -16,7 +16,7 @@ namespace GameRules
             _board = newBoard;
             SetPieces();
         }
-        
+       
         public void SetPieces()
         {
             for (int i = 7; i > 3; i--)
@@ -27,7 +27,6 @@ namespace GameRules
                 }
             }
         }
-
         public void MakeMove()
         {
             for (int i = 7; i >= 0; i--)

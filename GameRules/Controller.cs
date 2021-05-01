@@ -7,26 +7,39 @@ namespace GameRules
     public class Controller
     {
         private Board _board;
-        private Piece _piece;
+        private Piece _piece = Piece.whitePiece;
         private List<KeyValuePair<(int xFrom, int yFrom), (int xTo, int yTo)>> listOfSquares = new List<KeyValuePair<(int xFrom, int yFrom), (int xTo, int yTo)>>();
+        public bool whiteMoves = true;
 
-
-        private bool whiteMoves = true;
         internal (int x, int y) _from;
-        internal (int x, int y) _to;
+        internal (int x, int y) _to; 
 
         internal bool endGame = false;
+        internal bool robotWon = false;
 
         public Controller(Board board)
         {
             _board = board;
         }
 
-        public void SetCmd(string cmd)
+        public void SetFrom((int x, int y) from)
         {
-            _from = ((cmd[0] - 'a'), (cmd[1] - '1'));
-            _to = ((cmd[2] - 'a'), (cmd[3] - '1'));
-            _piece = whiteMoves ? Piece.whitePiece : Piece.brownPiece;
+            _from = from;
+        }
+
+        public void SetTo((int x, int y) to)
+        {
+            _to = to;
+        }
+
+        public (int x, int y) GetFrom()
+        {
+            return _from;
+        }
+
+        public (int x, int y) GetTo()
+        {
+            return _to;
         }
 
         public bool IsPiece()
@@ -338,7 +351,16 @@ namespace GameRules
 
         public void SetTurn()
         {
-            whiteMoves = !whiteMoves;
+            if (_piece == Piece.whitePiece)
+            {
+                _piece = Piece.brownPiece;
+                whiteMoves = false;
+            }
+            else 
+            {
+                _piece = Piece.whitePiece;
+                whiteMoves = true;
+            };
         }
 
         public void EstimateAndMark((int x, int y) to)
